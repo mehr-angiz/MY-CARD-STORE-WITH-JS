@@ -1,0 +1,222 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>My Store - Products</title>
+    <meta charset="utf-8" />
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="Content/Site.css" rel="stylesheet" />
+    <script>
+
+        var categories = ["Bee", "tally ho", "Bicycle", "kim"];
+        var products = [
+            { id: 1, category: "Bee", name: "skull", price: 10, isActive: true },
+              { id: 2, category: "Bee", name: "red skull", price: 11, isActive: true },
+                { id: 3, category: "Bee", name: "black skull", price: 13, isActive: true },
+                  { id: 4, category: "tally ho", name: "black heart", price: 2, isActive: true },
+                  { id: 5, category: "tally ho", name: "red heart", price: 2, isActive: true },
+                  { id: 6, category: "kim", name: "casino", price: 6, isActive: true },
+                  { id: 7, category: "kim", name: "Grimoire", price: 1, isActive: true },
+                    { id: 8, category: "Bicycle", name: "Disruption", price: 14, isActive: true },
+                    { id: 9, category: "Bicycle", name: "series 1800", price: 14, isActive: true },
+                     { id: 10, category: "tally ho", name: "Black Ghost", price: 3, isActive: true },
+                      { id: 11, category: "tally ho", name: "joker", price: 1, isActive: true },
+        ];
+        var selectedProducts = [];
+        var total = 0;
+
+
+        window.onload = function () {
+            categoriesBinder();
+            // showCatalog();
+            catalogBinder();
+        }
+
+
+        function categoriesBinder() {
+            var cmbCategories = document.getElementById("cmbCategories");
+            for (var i = 0; i < categories.length; i++) {
+                var option = document.createElement("option");
+                option.innerText = categories[i];
+                cmbCategories.appendChild(option);
+            }
+        }
+
+
+        function showCatalog(products) {
+            var catalog = document.getElementById("catalog");
+            catalog.innerHTML = "";
+            for (var i = 0; i < products.length; i++) {
+                var box = document.createElement("div");
+                box.classList = "box left";
+                var image = document.createElement("img");
+                image.src = "images/Products/" + products[i].id + ".jpg";
+                image.alt = products[i].name;
+                box.appendChild(image);
+                var name = document.createElement("h4");
+                name.innerText = products[i].name;
+                box.appendChild(name);
+                var price = document.createElement("h5");
+                price.innerText = "Price: " + products[i].price + "$";
+                box.appendChild(price);
+                var divqQuantity = document.createElement("div");
+                divqQuantity.classList = "divQuanity";
+                var minus = document.createElement("button");
+                minus.classList = "minus";
+                minus.innerText = "-";
+                minus.setAttribute("id", "minus" + products[i].id);
+                minus.setAttribute("onclick", "minus(" + products[i].id + ")");
+                divqQuantity.appendChild(minus);
+                var spanQnt = document.createElement("span");
+                spanQnt.classList = "selectedQnt";
+                spanQnt.innerText = "1";
+                spanQnt.setAttribute("id", "span" + products[i].id);
+                divqQuantity.appendChild(spanQnt);
+                var plus = document.createElement("button");
+                plus.classList = "plus";
+                plus.innerText = "+";
+                plus.setAttribute("id", "plus" + products[i].id);
+                plus.setAttribute("onclick", "plus(" + products[i].id + ")");
+                divqQuantity.appendChild(plus);
+                box.appendChild(divqQuantity);
+                var addButton = document.createElement("button");
+                addButton.type = "button";
+                addButton.setAttribute("onclick", "addToBasket(" + products[i].id + ")");
+                addButton.setAttribute("id", "item" + products[i].id);
+                addButton.setAttribute("data-name", products[i].name);
+                addButton.setAttribute("data-price", products[i].price);
+                addButton.innerText = "Add";
+                addButton.classList = "btn btn-info";
+                box.appendChild(addButton);
+                catalog.appendChild(box);
+            }
+        }
+
+
+        function catalogBinder() {
+            var currentCategory = document.getElementById("cmbCategories").value;
+            var items = [];
+            if (currentCategory === "All") {
+                for (var i = 0; i < products.length; i++) {
+                    if (products[i].isActive == true) {
+                        items.push(products[i]);
+                    }
+                }
+            }
+            else {
+                for (var i = 0; i < products.length; i++) {
+                    if (products[i].category === currentCategory && products[i].isActive == true) {
+                        items.push(products[i]);
+                    }
+                }
+            }
+            if (items.length > 0) {
+                showCatalog(items);
+            }
+            else {
+                var catalog = document.getElementById("catalog");
+                catalog.innerHTML = ""
+                var notFoundMessage = document.createElement("h4");
+                notFoundMessage.innerText = "There is No Product in This Category!!!!";
+                notFoundMessage.classList = "alert alert-danger";
+                catalog.appendChild(notFoundMessage);
+            }
+
+        }
+
+
+        function insert(id) {
+            var bill = document.getElementById("bill");
+            var item = document.getElementById("item" + id);
+            var dataName = item.getAttribute("data-name");
+            var dataPrice = item.getAttribute("data-price");
+            var quantity = document.getElementById("span" + id).innerText;
+            var data = { id: id, name: dataName, price: dataPrice, quantity: quantity };
+            selectedProducts.push(data);
+            var p = document.createElement("p");
+            p.innerText = dataName + " (" + data.quantity + ")";
+            p.id = "parag" + id;
+            var icon = document.createElement("img");
+            icon.src = "images/Theme/remove-icon.png";
+            icon.alt = "delete icon";
+            icon.setAttribute("onclick", "remove(" + id + ")");
+            var anchor = document.createElement("a");
+            anchor.setAttribute("onclick", "");
+            anchor.appendChild(icon);
+            p.appendChild(anchor);
+            bill.appendChild(p);
+            total = total + Number(dataPrice*quantity);
+            var totalSpan = document.getElementById("total");
+            totalSpan.innerText = total;
+        }
+
+
+        function addToBasket(id) {
+            if (selectedProducts.length === 0) {
+                insert(id);
+            }
+
+            else {
+                var exist = false;
+                for (var i = 0; i < selectedProducts.length; i++) {
+                    if (selectedProducts[i].id === id) {
+                        exist = true;
+                        selectedProducts[i].quantity++;
+                        break;
+                    }
+                 
+                }
+                if (exist === true) {
+                   
+                }
+                else {
+                    insert(id);
+                }
+            }
+
+        }
+
+
+        function plus(id) {
+            var span = document.getElementById("span" + id);
+            var qnt = Number(span.innerText);
+            qnt++;
+            span.innerText = qnt;
+        }
+
+
+        function minus(id) {
+            var span = document.getElementById("span" + id);
+            var qnt = Number(span.innerText);
+            qnt--;
+            span.innerText = qnt;
+        }
+
+
+        function remove(id) {
+            var p = document.getElementById("parag" + id);
+            p.remove();
+        }
+    </script>
+</head>
+<body>
+    <div class="page-header">
+        <h1> My store</h1>
+        <div class="form-group">
+            <span class="control-label">Filter Categories:</span>
+            <select class="form-control" id="cmbCategories" onchange="catalogBinder()">
+                <option>All</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div id="basket" class="col-md-3">
+            <p class="alert alert-info">Total: <span id="total">0</span></p>
+            <div id="bill"></div>
+			<button id="pay" type="button" class="btn btn-info">Pay Invoice</button>
+        </div>
+        <div id="catalog" class="col-md-9">
+        </div>
+
+    </div>
+</body>
+</html>
